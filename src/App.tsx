@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { SafetyProvider } from "./context/SafetyContext";
+import { SafetyProvider } from "../context/SafetyContext";
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import SmartRoute from "./pages/SmartRoute";
