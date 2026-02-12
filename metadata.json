@@ -1,0 +1,7 @@
+{
+  "name": "SurakshaAI",
+  "description": "AI Powered Smart Personal Safety System with SOS, Voice Activation, and Shake Detection simulations.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
