@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-import { SafetyProvider } from "./context/SafetyContext";
-import Layout from "./components/Layout";
-import Dashboard from "./pages/Dashboard";
-import SmartRoute from "./pages/SmartRoute";
-import Contacts from "./pages/Contacts";
-import ActivityLogPage from "./pages/ActivityLog";
-import Settings from "./pages/Settings";
-
+import { SafetyProvider } from "../context/SafetyContext";
+import Layout from "../components/Layout";
+import Dashboard from "../pages/Dashboard";
+import SmartRoute from "../pages/SmartRoute";
+import Contacts from "../pages/Contacts";
+import ActivityLogPage from "../pages/ActivityLog";
+import Settings from "../pages/Settings";
 const AppContent = () => {
   const [currentView, setCurrentView] = useState("dashboard");
 
