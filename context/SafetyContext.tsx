@@ -21,48 +21,77 @@ const SafetyContext = createContext<SafetyContextType | undefined>(undefined);
 
 export const SafetyProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [status, setStatus] = useState<SafetyStatus>(SafetyStatus.SAFE);
+  
+  // Safe initialization for contacts
   const [contacts, setContacts] = useState<Contact[]>(() => {
-    const saved = localStorage.getItem('suraksha_contacts');
-    return saved ? JSON.parse(saved) : INITIAL_CONTACTS;
+    if (typeof window === 'undefined') return INITIAL_CONTACTS;
+    try {
+      const saved = localStorage.getItem('suraksha_contacts');
+      return saved ? JSON.parse(saved) : INITIAL_CONTACTS;
+    } catch (e) {
+      console.warn('Failed to parse contacts from local storage', e);
+      return INITIAL_CONTACTS;
+    }
   });
+
+  // Safe initialization for logs
   const [logs, setLogs] = useState<ActivityLog[]>(() => {
-    const saved = localStorage.getItem('suraksha_logs');
-    return saved ? JSON.parse(saved) : [];
+    if (typeof window === 'undefined') return [];
+    try {
+      const saved = localStorage.getItem('suraksha_logs');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      console.warn('Failed to parse logs from local storage', e);
+      return [];
+    }
   });
+
   const [settings, setSettings] = useState<AppSettings>({
     stealthMode: false,
     theme: 'dark',
     language: 'en'
   });
 
+  // Effects for persistence
   useEffect(() => {
-    localStorage.setItem('suraksha_contacts', JSON.stringify(contacts));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('suraksha_contacts', JSON.stringify(contacts));
+    }
   }, [contacts]);
 
   useEffect(() => {
-    localStorage.setItem('suraksha_logs', JSON.stringify(logs));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('suraksha_logs', JSON.stringify(logs));
+    }
   }, [logs]);
 
   useEffect(() => {
-    if (settings.theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+    if (typeof window !== 'undefined') {
+      if (settings.theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
     }
   }, [settings.theme]);
 
   const triggerSOS = async (type: ActivityLog['type']) => {
     setStatus(SafetyStatus.DANGER);
     try {
+      // Call mock service
       const newLog = await createEmergencyLog(type);
       setLogs(prev => [newLog, ...prev]);
       
       if (!settings.stealthMode) {
-        // Play sound or vibrate if not in stealth mode (simulated)
-        if (navigator.vibrate) navigator.vibrate([500, 200, 500]);
+        // Safe vibration check
+        if (typeof navigator !== 'undefined' && navigator.vibrate) {
+          navigator.vibrate([500, 200, 500]);
+        }
       }
     } catch (error) {
       console.error("Failed to create log", error);
+      // Even if logging fails, ensure UI shows danger
+      setStatus(SafetyStatus.DANGER);
     }
   };
 
@@ -90,6 +119,10 @@ export const SafetyProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     setContacts(INITIAL_CONTACTS);
     setLogs([]);
     setStatus(SafetyStatus.SAFE);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('suraksha_contacts');
+      localStorage.removeItem('suraksha_logs');
+    }
   };
 
   return (
